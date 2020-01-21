@@ -1,3 +1,4 @@
+import 'package:faker/faker.dart' as Faker;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:worldr_task/bloc/app/bloc.dart';
@@ -5,6 +6,8 @@ import 'package:worldr_task/bloc/person/bloc.dart';
 import 'package:worldr_task/core/errors/global_messages.dart';
 import 'package:worldr_task/data/repository/message_repository.dart';
 import 'package:worldr_task/entity/person/person.dart';
+
+import '../../entity/person/person.dart';
 
 class PeopleScreen extends StatelessWidget {
   final MessageRepository messageRepository;
@@ -71,34 +74,47 @@ class PeopleScreen extends StatelessWidget {
   }
 
   Widget _personCard(BuildContext context, Person person) {
+    /// Whether or not the content of the card should be randomly right aligned
+    /// if the person's sportsType is Hockey
+    final rightAlignContent =
+        Faker.random.boolean() && person.sportsType == SportsType.Hockey;
+
+    final textWidget = Text(
+      '${person.firstName} ${person.lastName}',
+      style: TextStyle(fontSize: 16),
+    );
+
+    final circleWidget = Padding(
+      padding: const EdgeInsets.all(8),
+      child: Container(
+          height: 48,
+          width: 48,
+          decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color.fromARGB(
+                  255, person.colorRed, person.colorGreen, person.colorBlue))),
+    );
+
     return GestureDetector(
       onTap: () => BlocProvider.of<AppBloc>(context).add(AppEvent.goToMessages(
           pageNum: 2, filtedByGuid: person.guid, filterBySportsType: null)),
       child: Padding(
-          padding: const EdgeInsets.all(4),
-          child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              elevation: 4,
-              child: Container(
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                          height: 48,
-                          width: 48,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color.fromARGB(255, person.colorRed,
-                                  person.colorGreen, person.colorBlue))),
-                    ),
-                    Text(
-                      '${person.firstName} ${person.lastName}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ])))),
+        padding: const EdgeInsets.all(4),
+        child: Card(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 4,
+          child: Container(
+            child: rightAlignContent
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[textWidget, circleWidget])
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[circleWidget, textWidget]),
+          ),
+        ),
+      ),
     );
   }
 }
